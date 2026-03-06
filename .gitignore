@@ -4,7 +4,8 @@ __pycache__/
 *.db
 frontend/static/uploads/*
 !frontend/static/uploads/.gitkeep
-ml/*.pkl
-spam.csv
+# ML files are now included for deployment
+# ml/*.pkl
+# spam.csv
 .env
 .dev-secret-change-me

@@ -6,4 +6,3 @@ scipy==1.11.4
 numpy==1.26.2
 werkzeug==3.0.1
 pytesseract==0.3.10
-gunicorn==21.2.0

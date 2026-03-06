@@ -7,10 +7,8 @@ import uuid
 import datetime
 import shutil
 
-# --- PATH CONFIGURATION (RELATIVE TO ROOT) ---
-# api/index.py is one level deep
-API_DIR = os.path.dirname(os.path.abspath(__file__))
-BASE_DIR = os.path.dirname(API_DIR)
+# --- PATH CONFIGURATION ---
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(BASE_DIR, 'frontend', 'templates')
 STATIC_DIR = os.path.join(BASE_DIR, 'frontend', 'static')
 

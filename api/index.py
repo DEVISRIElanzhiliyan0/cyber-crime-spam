@@ -8,7 +8,9 @@ import datetime
 import shutil
 
 # --- PATH CONFIGURATION ---
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Vercel's working directory is the root of the project.
+# Since we are in api/index.py, BASE_DIR should point to the project root.
+BASE_DIR = os.getcwd() 
 TEMPLATES_DIR = os.path.join(BASE_DIR, 'frontend', 'templates')
 STATIC_DIR = os.path.join(BASE_DIR, 'frontend', 'static')
 
@@ -25,11 +27,11 @@ if IS_VERCEL:
         orig_db = os.path.join(BASE_DIR, 'cybercrime.db')
         if os.path.exists(orig_db):
             shutil.copy2(orig_db, DB_PATH)
-    os.makedirs(UPLOAD_DIR, exist_ok=True)
 else:
     UPLOAD_DIR = os.path.join(STATIC_DIR, 'uploads')
     DB_PATH = os.path.join(BASE_DIR, 'cybercrime.db')
-    os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 # --- DATABASE ---
 def get_db():
@@ -69,7 +71,7 @@ def load_ml():
 TRANSLATIONS = {
     'en': {'title': 'AI Cyber Assistant', 'welcome': 'Hello! How can I help?', 'safe_msg': 'Safe', 'spam_msg': 'Spam', 'phishing_msg': 'Phishing', 'scam_msg': 'Scam'},
     'ta': {'title': 'AI உதவியாளர்', 'welcome': 'வணக்கம்!', 'safe_msg': 'பாதுகாப்பு', 'spam_msg': 'ஸ்பேம்', 'phishing_msg': 'ஃபிஷிங்', 'scam_msg': 'மோசடி'},
-    'hi': {'title': 'AI सहायक', 'welcome': 'नमस्ते!', 'safe_msg': 'सुरक्षित', 'spam_msg': 'स्पैम', 'phishing_msg': 'फ़िशिंग', 'scam_msg': 'घोटाला'}
+    'hi': {'title': 'AI सहायक', 'welcome': 'नमस्ते!', 'safe_msg': 'सुरक्षित', 'spam_msg': 'स्पैम', 'phishing_msg': 'फ़িশિંગ', 'scam_msg': 'घोटाला'}
 }
 
 @app.before_request
@@ -130,7 +132,7 @@ def spam_upload():
         ocr = pytesseract.image_to_string(Image.open(path))
     except: pass
     txt = (request.form.get('message', '') + " " + ocr).strip()
-    if not txt: return render_template('spam_check.html', ocr_error='No text.')
+    if not txt: return render_template('spam_check.html', ocr_error='No text extracted.')
     load_ml()
     res = "Spam" if model and int(model.predict(vectorizer.transform([txt]))[0]) == 1 else "Unknown"
     return render_template('spam_check.html', ocr_text=txt, ocr_result=res, uploaded=f.filename)
@@ -183,6 +185,5 @@ def games(): return render_template('games.html')
 def guidelines(): return render_template('guidelines.html')
 
 # Vercel needs 'app' exported
-# No app.run() here to avoid issues during build
 if __name__ == "__main__":
     app.run(debug=True)

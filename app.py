@@ -8,9 +8,7 @@ import datetime
 import shutil
 
 # --- PATH CONFIGURATION ---
-# Vercel's working directory is the root of the project.
-# Since we are in api/index.py, BASE_DIR should point to the project root.
-BASE_DIR = os.getcwd() 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(BASE_DIR, 'frontend', 'templates')
 STATIC_DIR = os.path.join(BASE_DIR, 'frontend', 'static')
 

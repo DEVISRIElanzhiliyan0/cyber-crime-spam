@@ -7,8 +7,10 @@ import uuid
 import datetime
 import shutil
 
-# --- PATH CONFIGURATION ---
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# --- PATH CONFIGURATION (RELATIVE TO ROOT) ---
+# api/index.py is one level deep
+API_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(API_DIR)
 TEMPLATES_DIR = os.path.join(BASE_DIR, 'frontend', 'templates')
 STATIC_DIR = os.path.join(BASE_DIR, 'frontend', 'static')
 
@@ -21,16 +23,15 @@ IS_VERCEL = os.environ.get('VERCEL') == '1'
 if IS_VERCEL:
     UPLOAD_DIR = '/tmp/uploads'
     DB_PATH = '/tmp/cybercrime.db'
-    # Copy DB to writable /tmp
     if not os.path.exists(DB_PATH):
         orig_db = os.path.join(BASE_DIR, 'cybercrime.db')
         if os.path.exists(orig_db):
             shutil.copy2(orig_db, DB_PATH)
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
 else:
     UPLOAD_DIR = os.path.join(STATIC_DIR, 'uploads')
     DB_PATH = os.path.join(BASE_DIR, 'cybercrime.db')
-
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 # --- DATABASE ---
 def get_db():
@@ -38,7 +39,7 @@ def get_db():
     conn.row_factory = sqlite3.Row
     return conn
 
-# Initialize DB on first load
+# Ensure DB is initialized
 with sqlite3.connect(DB_PATH) as conn:
     conn.execute('''
         CREATE TABLE IF NOT EXISTS complaints (
@@ -57,6 +58,7 @@ model = None
 vectorizer = None
 def load_ml():
     global model, vectorizer
+    if model is not None: return
     try:
         m_path = os.path.join(BASE_DIR, 'ml', 'spam_model.pkl')
         v_path = os.path.join(BASE_DIR, 'ml', 'vectorizer.pkl')
@@ -65,18 +67,15 @@ def load_ml():
             with open(v_path, 'rb') as f: vectorizer = pickle.load(f)
     except: pass
 
-load_ml()
-
 # --- TRANSLATIONS ---
 TRANSLATIONS = {
-    'en': {'title': 'AI Cyber Assistant', 'welcome': 'Hello! I am your Cyber Safety Partner.', 'safe_msg': 'Content Safe', 'spam_msg': 'Spam detected', 'phishing_msg': 'Phishing alert', 'scam_msg': 'Scam alert'},
+    'en': {'title': 'AI Cyber Assistant', 'welcome': 'Hello! How can I help?', 'safe_msg': 'Safe', 'spam_msg': 'Spam', 'phishing_msg': 'Phishing', 'scam_msg': 'Scam'},
     'ta': {'title': 'AI உதவியாளர்', 'welcome': 'வணக்கம்!', 'safe_msg': 'பாதுகாப்பு', 'spam_msg': 'ஸ்பேம்', 'phishing_msg': 'ஃபிஷிங்', 'scam_msg': 'மோசடி'},
     'hi': {'title': 'AI सहायक', 'welcome': 'नमस्ते!', 'safe_msg': 'सुरक्षित', 'spam_msg': 'स्पैम', 'phishing_msg': 'फ़िशिंग', 'scam_msg': 'घोटाला'}
 }
 
-# --- ROUTES ---
 @app.before_request
-def setup():
+def setup_session():
     if 'lang' not in session: session['lang'] = 'en'
     if request.args.get('lang'): session['lang'] = request.args.get('lang')
 
@@ -90,11 +89,10 @@ def complaint():
     if request.method == 'POST':
         unique_id = f"CY-{datetime.datetime.now().strftime('%Y%m')}-{uuid.uuid4().hex[:6].upper()}"
         with get_db() as conn:
-            cur = conn.cursor()
-            cur.execute("INSERT INTO complaints (complaint_id,name,email,phone,type,status) VALUES (?,?,?,?,?,?)",
+            conn.execute("INSERT INTO complaints (complaint_id,name,email,phone,type,status) VALUES (?,?,?,?,?,?)",
                        (unique_id, request.form['name'], request.form['email'], request.form['phone'], request.form['type'], 'Received'))
             conn.commit()
-            lid = cur.lastrowid
+            lid = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
         return render_template('complaint_success.html', complaint_id=unique_id, db_id=lid, name=request.form['name'], ctype=request.form['type'])
     return render_template("complaint.html")
 
@@ -104,23 +102,21 @@ def track():
     if request.method == 'POST':
         cid = request.form.get('id', '').strip()
         with get_db() as conn:
-            cur = conn.cursor()
-            if cid.isdigit(): cur.execute("SELECT * FROM complaints WHERE id=?", (int(cid),))
-            else: cur.execute("SELECT * FROM complaints WHERE UPPER(complaint_id)=?", (cid.upper(),))
-            row = cur.fetchone()
+            if cid.isdigit(): row = conn.execute("SELECT * FROM complaints WHERE id=?", (int(cid),)).fetchone()
+            else: row = conn.execute("SELECT * FROM complaints WHERE UPPER(complaint_id)=?", (cid.upper(),)).fetchone()
             if row: result = dict(row)
-            else: error = 'No complaint found.'
+            else: error = 'Not found.'
     return render_template("track.html", result=result, error=error)
 
 @app.route('/spam', methods=['GET','POST'])
 def spam():
     if request.method == 'POST':
         msg = request.form['message']
-        if model is None: load_ml()
+        load_ml()
         if model:
             res = "Spam" if int(model.predict(vectorizer.transform([msg]))[0]) == 1 else "Not Spam"
             return f"Prediction: {res}"
-        return "Model not ready."
+        return "Model not loaded."
     return render_template("spam_check.html")
 
 @app.route('/spam/upload', methods=['POST'])
@@ -137,7 +133,7 @@ def spam_upload():
     except: pass
     txt = (request.form.get('message', '') + " " + ocr).strip()
     if not txt: return render_template('spam_check.html', ocr_error='No text.')
-    if model is None: load_ml()
+    load_ml()
     res = "Spam" if model and int(model.predict(vectorizer.transform([txt]))[0]) == 1 else "Unknown"
     return render_template('spam_check.html', ocr_text=txt, ocr_result=res, uploaded=f.filename)
 
@@ -153,9 +149,8 @@ def admin_login():
 def admin_dashboard():
     if not session.get('admin'): return redirect(url_for('admin_login'))
     with get_db() as conn:
-        cur = conn.cursor()
-        total = cur.execute("SELECT COUNT(*) FROM complaints").fetchone()[0]
-        recent = [dict(r) for r in cur.execute("SELECT * FROM complaints ORDER BY id DESC LIMIT 10").fetchall()]
+        total = conn.execute("SELECT COUNT(*) FROM complaints").fetchone()[0]
+        recent = [dict(r) for r in conn.execute("SELECT * FROM complaints ORDER BY id DESC LIMIT 10").fetchall()]
     return render_template('admin_dashboard.html', total=total, recent=recent)
 
 @app.route('/assistant')
@@ -189,9 +184,7 @@ def games(): return render_template('games.html')
 @app.route('/guidelines')
 def guidelines(): return render_template('guidelines.html')
 
-# Health check
-@app.route('/api/health')
-def health(): return {"status": "ok"}
-
+# Vercel needs 'app' exported
+# No app.run() here to avoid issues during build
 if __name__ == "__main__":
     app.run(debug=True)

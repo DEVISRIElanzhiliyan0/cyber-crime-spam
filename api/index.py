@@ -8,8 +8,9 @@ import datetime
 import shutil
 
 # --- PATH CONFIGURATION ---
+# Current file is in /api/index.py
 API_DIR = os.path.dirname(os.path.abspath(__file__))
-BASE_DIR = os.path.dirname(API_DIR)
+BASE_DIR = os.path.dirname(API_DIR) # Moves up to project root
 TEMPLATES_DIR = os.path.join(BASE_DIR, 'frontend', 'templates')
 STATIC_DIR = os.path.join(BASE_DIR, 'frontend', 'static')
 

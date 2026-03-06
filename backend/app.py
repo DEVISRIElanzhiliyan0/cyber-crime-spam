@@ -12,7 +12,13 @@ TEMPLATES_DIR = os.path.abspath(os.path.join(BASE_DIR, '..', 'frontend', 'templa
 STATIC_DIR = os.path.abspath(os.path.join(BASE_DIR, '..', 'frontend', 'static'))
 app = Flask(__name__, template_folder=TEMPLATES_DIR, static_folder=STATIC_DIR)
 app.secret_key = os.environ.get('FLASK_SECRET') or 'dev-secret-change-me'
-UPLOAD_DIR = os.path.abspath(os.path.join(BASE_DIR, '..', 'frontend', 'static', 'uploads'))
+# Detect Vercel environment
+IS_VERCEL = os.environ.get('VERCEL') == '1'
+
+if IS_VERCEL:
+    UPLOAD_DIR = '/tmp/uploads'
+else:
+    UPLOAD_DIR = os.path.abspath(os.path.join(BASE_DIR, '..', 'frontend', 'static', 'uploads'))
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @app.before_request

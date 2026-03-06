@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="d-flex justify-content-between align-items-center mb-5">
+                <div>
+                    <h1 class="fw-bold mb-0">{{ t.title }}</h1>
+                    <p class="text-muted">{{ t.welcome }}</p>
+                </div>
+                <!-- Adding Tesseract.js for client-side OCR -->
+                <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+                <div class="dropdown">
+                    <button class="btn btn-outline-gold dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-translate me-2"></i> Language
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-menu-item p-2 d-block text-decoration-none text-dark"
+                                href="/assistant?lang=en">English</a></li>
+                        <li><a class="dropdown-menu-item p-2 d-block text-decoration-none text-dark"
+                                href="/assistant?lang=ta">Tamil (தமிழ்)</a></li>
+                        <li><a class="dropdown-menu-item p-2 d-block text-decoration-none text-dark"
+                                href="/assistant?lang=hi">Hindi (हिन्दी)</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-5">
+                <div class="col-md-7">
+                    <div class="card card-premium p-4 h-100 shadow-sm border-0">
+                        <!-- Content Analysis Form -->
+                        <form action="/assistant/analyze" method="post" enctype="multipart/form-data">
+                            <input type="hidden" name="lang" value="{{ lang }}">
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-uppercase small text-muted">Analyze Screenshot /
+                                    Text</label>
+                                <textarea class="form-control mb-3" name="message" rows="5"
+                                    placeholder="Paste suspected text here..."
+                                    required>{{ message if message }}</textarea>
+
+                                <div class="upload-area p-4 border-2 border-dashed rounded-3 text-center bg-light"
+                                    id="drop-area">
+                                    <i class="bi bi-cloud-arrow-up display-6 text-muted mb-2"></i>
+                                    <p class="small text-muted mb-2">Upload screenshot for AI Vision analysis</p>
+                                    <input type="file" name="screenshot" id="fileElem" class="d-none"
+                                        onchange="previewFile(this)">
+                                    <button type="button" class="btn btn-outline-gold btn-sm"
+                                        onclick="document.getElementById('fileElem').click()">CHOOSE IMAGE</button>
+                                    <div id="ocr-status" class="mt-2 small text-primary d-none">
+                                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                        <span>Extracting text...</span>
+                                    </div>
+                                    <div id="preview-container" class="mt-3 d-none">
+                                        <img id="image-preview" src="#" alt="Preview"
+                                            class="img-fluid rounded-3 shadow-sm" style="max-height: 150px;">
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 py-3 fw-bold">{{ t.scan_btn }}</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="card card-premium p-4 h-100 shadow-sm border-0 bg-primary text-white">
+                        <h5 class="fw-bold mb-3"><i class="bi bi-chat-quote me-2"></i>Interactive Assistant</h5>
+                        <div class="chat-box mb-3 p-3 rounded-3 bg-white bg-opacity-10" id="chat-messages"
+                            style="height: 250px; overflow-y: auto;">
+                            <div class="mb-3">
+                                <span class="badge bg-gold text-dark mb-1">AI</span>
+                                <p class="small mb-0">{{ t.welcome }}</p>
+                            </div>
+                            {% if chat_mode %}
+                            <div class="mb-3 text-end">
+                                <span class="badge bg-light text-dark mb-1">You</span>
+                                <p class="small mb-0">{{ question }}</p>
+                            </div>
+                            <div class="mb-3">
+                                <span class="badge bg-gold text-dark mb-1">AI</span>
+                                <p class="small mb-0">{{ answer }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <form action="/assistant/chat" method="post" class="mb-3">
+                            <input type="hidden" name="lang" value="{{ lang }}">
+                            <div class="input-group">
+                                <input type="text" name="question"
+                                    class="form-control bg-transparent text-white border-gold"
+                                    placeholder="Ask a question..." required>
+                                <button class="btn btn-gold" type="submit"><i class="bi bi-send"></i></button>
+                            </div>
+                        </form>
+                        <a href="/games" class="btn btn-outline-gold w-100 btn-sm">{{ t.quiz_btn }}</a>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                async function previewFile(input) {
+                    const preview = document.getElementById('image-preview');
+                    const container = document.getElementById('preview-container');
+                    const status = document.getElementById('ocr-status');
+                    const textarea = document.querySelector('textarea[name="message"]');
+                    const file = input.files[0];
+
+                    if (file) {
+                        // Show preview
+                        const reader = new FileReader();
+                        reader.onloadend = function () {
+                            preview.src = reader.result;
+                            container.classList.remove('d-none');
+                        }
+                        reader.readAsDataURL(file);
+
+                        // Perform Client-side OCR
+                        status.classList.remove('d-none');
+                        try {
+                            const { data: { text } } = await Tesseract.recognize(file, 'eng', {
+                                logger: m => console.log(m)
+                            });
+                            if (text && text.trim().length > 0) {
+                                textarea.value = text.trim();
+                                status.innerHTML = '<i class="bi bi-check-circle-fill text-success me-2"></i>Text extracted automatically!';
+                            } else {
+                                status.innerHTML = '<i class="bi bi-exclamation-circle text-warning me-2"></i>No text detected in image.';
+                            }
+                        } catch (err) {
+                            console.error(err);
+                            status.innerHTML = '<i class="bi bi-exclamation-triangle text-danger me-2"></i>OCR failed. Please enter text manually.';
+                        }
+                    } else {
+                        preview.src = "";
+                        container.classList.add('d-none');
+                        status.classList.add('d-none');
+                    }
+                }
+
+                // Auto scroll chat
+                const chatBox = document.getElementById('chat-messages');
+                if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
+            </script>
+
+            {% if analyzed %}
+            <div class="reveal mt-5">
+                <div class="card card-premium p-5 border-0 shadow-lg text-center" style="background: white;">
+                    <div class="mb-4">
+                        {% if level == 'high' %}
+                        <div class="display-1 text-danger mb-3"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                        {% elif level == 'med' %}
+                        <div class="display-1 text-warning mb-3"><i class="bi bi-exclamation-circle-fill"></i></div>
+                        {% else %}
+                        <div class="display-1 text-success mb-3"><i class="bi bi-check-circle-fill"></i></div>
+                        {% endif %}
+                        <h2 class="fw-bold">{{ t.risk_labels[level] }} Detected</h2>
+                        <div class="badge bg-light text-dark px-4 py-2 rounded-pill h5 mt-2">Score: {{ score }}%</div>
+                    </div>
+
+                    <div class="p-4 rounded-4 bg-light mb-4 text-start">
+                        <h5 class="fw-bold mb-2">Verdict: {{ res_type }}</h5>
+                        <p class="lead mb-3">{{ reason }}</p>
+
+                        {% if ocr_text %}
+                        <div class="mt-3 p-3 bg-white rounded-3 border">
+                            <h6 class="fw-bold small text-muted text-uppercase mb-2">Extracted Text (OCR)</h6>
+                            <p class="small mb-0 text-muted">{{ ocr_text }}</p>
+                        </div>
+                        {% endif %}
+
+                        {% if uploaded %}
+                        <div class="mt-3">
+                            <h6 class="fw-bold small text-muted text-uppercase mb-2">Analyzed Evidence</h6>
+                            <img src="{{ url_for('static', filename='uploads/' + uploaded) }}"
+                                class="img-fluid rounded-3 shadow-sm border" style="max-height: 200px;">
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {% if level == 'high' %}
+                    <div class="alert alert-danger text-start p-4 rounded-4 border-0">
+                        <h5 class="fw-bold mb-3"><i class="bi bi-info-circle me-2"></i> {{ t.steps_title }}</h5>
+                        <ol class="mb-0 d-grid gap-2">
+                            <li><strong>Do not engage:</strong> Immediately block the sender and do not click any links.
+                            </li>
+                            <li><strong>Preserve Evidence:</strong> Save the message, screenshot the sender's
+                                info/number.</li>
+                            <li><strong>File Formal Report:</strong> Using the button below, submit details to our
+                                investigation team.</li>
+                            <li><strong>Report on National Portal:</strong> Visit <a href="https://cybercrime.gov.in"
+                                    target="_blank" class="fw-bold">cybercrime.gov.in</a> for official legal action.
+                            </li>
+                        </ol>
+                    </div>
+                    <div class="d-flex gap-3 justify-content-center mt-4">
+                        <a href="/complaint" class="btn btn-danger px-5 py-3 fw-bold">START INVESTIGATION</a>
+                        <a href="/" class="btn btn-outline-dark px-5 py-3">BACK TO HUB</a>
+                    </div>
+                    {% else %}
+                    <div class="text-start p-4 rounded-4 bg-success-subtle border-0">
+                        <h5 class="fw-bold mb-2 text-success">Safety Recommendation</h5>
+                        <p class="mb-0">While this message doesn't trigger our high-risk alerts, always verify sensitive
+                            requests through official channels. Use our "Safety Hub" for more prevention tips.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

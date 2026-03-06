@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .success-card {
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid rgba(16, 185, 129, 0.35);
+        border-radius: 20px;
+        color: #e2e8f0;
+        max-width: 600px;
+    }
+
+    .id-box {
+        background: rgba(16, 185, 129, 0.1);
+        border: 2px dashed rgba(16, 185, 129, 0.4);
+        border-radius: 12px;
+        font-family: 'Courier New', monospace;
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #6ee7b7;
+        letter-spacing: 0.1em;
+    }
+
+    .timer-badge {
+        background: rgba(234, 179, 8, 0.15);
+        border: 1px solid rgba(234, 179, 8, 0.3);
+        color: #fde047;
+        border-radius: 50px;
+        padding: 6px 18px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .step-dot {
+        width: 32px;
+        height: 32px;
+        background: rgba(181, 154, 90, 0.2);
+        border: 2px solid #b59a5a;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #b59a5a;
+        flex-shrink: 0;
+    }
+
+    .pulse-ring {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+        }
+
+        70% {
+            box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+        }
+
+        100% {
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+        }
+    }
+</style>
+
+<div class="d-flex justify-content-center align-items-center py-5">
+    <div class="success-card p-5 text-center w-100">
+
+        <!-- Icon -->
+        <div class="pulse-ring d-inline-flex align-items-center justify-content-center mb-4"
+            style="width:80px;height:80px;background:rgba(16,185,129,0.15);border:2px solid rgba(16,185,129,0.4);border-radius:50%;">
+            <i class="bi bi-check-circle-fill text-success" style="font-size:2.2rem;"></i>
+        </div>
+
+        <h2 class="fw-bold text-white mb-1">Complaint Filed! ✅</h2>
+        <p class="mb-4" style="color:#94a3b8;">Hello <strong style="color:#e2e8f0;">{{ name }}</strong>, your <em>{{
+                ctype }}</em> complaint has been received.</p>
+
+        <!-- Complaint ID -->
+        <p class="small mb-2" style="color:#94a3b8; letter-spacing:0.1em; text-transform:uppercase;">Your Tracking ID
+        </p>
+        <div class="id-box py-3 px-4 mx-auto mb-4" style="max-width:340px;">
+            {{ complaint_id }}
+        </div>
+        {% if db_id %}
+        <p class="small mb-4" style="color:#64748b;">Database reference: <strong style="color:#94a3b8;">#{{ db_id
+                }}</strong></p>
+        {% endif %}
+
+        <!-- 30 min notice -->
+        <div class="timer-badge mb-4">
+            ⏱️ &nbsp; Expected Response: Within <strong>30 Minutes</strong>
+        </div>
+
+        <!-- Steps -->
+        <div class="text-start mt-4 mb-5 px-3">
+            <p class="fw-bold small mb-3" style="color:#b59a5a; letter-spacing:0.1em; text-transform:uppercase;">What
+                Happens Next</p>
+            <div class="d-flex align-items-start gap-3 mb-3">
+                <div class="step-dot">1</div>
+                <div><strong style="color:#e2e8f0;">Complaint Logged</strong><br><span
+                        style="color:#94a3b8; font-size:0.85rem;">Your report is securely saved in our system.</span>
+                </div>
+            </div>
+            <div class="d-flex align-items-start gap-3 mb-3">
+                <div class="step-dot">2</div>
+                <div><strong style="color:#e2e8f0;">Under Review</strong><br><span
+                        style="color:#94a3b8; font-size:0.85rem;">Our cyber officers will assess and prioritise your
+                        case.</span></div>
+            </div>
+            <div class="d-flex align-items-start gap-3">
+                <div class="step-dot">3</div>
+                <div><strong style="color:#e2e8f0;">Action Taken</strong><br><span
+                        style="color:#94a3b8; font-size:0.85rem;">You can track the status using your Tracking ID at any
+                        time.</span></div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a href="/track" class="btn btn-primary px-4"><i class="bi bi-search me-2"></i>Track Status</a>
+            <a href="/" class="btn btn-outline-light px-4">Back to Home</a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

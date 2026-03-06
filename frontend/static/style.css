@@ -1,0 +1,212 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
+
+:root {
+    --primary: #0f172a;
+    /* Deep Navy */
+    --accent: #b59a5a;
+    /* Royal Gold */
+    --accent-glow: rgba(181, 154, 90, 0.4);
+    --surface: #ffffff;
+    --background: #f1f5f9;
+    --text-main: #0f172a;
+    --text-muted: #475569;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --border: #e2e8f0;
+    --shadow-premium: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.1);
+}
+
+body {
+    background: linear-gradient(rgba(15, 23, 42, 0.88), rgba(15, 23, 42, 0.88)),
+        url('/static/images/cyber-bg.png') center/cover fixed;
+    color: var(--text-main);
+    font-family: 'Inter', system-ui, sans-serif;
+    line-height: 1.6;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.navbar-brand {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+}
+
+/* Header & Navigation */
+.navbar {
+    background: rgba(15, 23, 42, 0.95) !important;
+    backdrop-filter: blur(10px);
+    border-bottom: 2px solid var(--accent);
+    padding: 1rem 0;
+}
+
+.navbar-brand img {
+    height: 45px;
+    filter: drop-shadow(0 0 8px var(--accent-glow));
+}
+
+.nav-link {
+    color: #cbd5e1 !important;
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    transition: all 0.3s;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    color: var(--accent) !important;
+}
+
+/* Hero Section */
+.hero-container {
+    background: linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.9)),
+        url('/static/images/hero.png') center/cover;
+    border-radius: 0 0 3rem 3rem;
+    padding: 8rem 0;
+    color: white;
+    box-shadow: var(--shadow-premium);
+}
+
+.hero-badge {
+    background: rgba(181, 154, 90, 0.2);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 0.5rem 1.5rem;
+    border-radius: 2rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    display: inline-block;
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--accent);
+    border-color: var(--accent);
+    color: #1e1b4b;
+    font-weight: 700;
+    padding: 0.8rem 2rem;
+    border-radius: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.btn-primary:hover {
+    background-color: #c9ae70;
+    border-color: #c9ae70;
+    color: #1e1b4b;
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px var(--accent-glow);
+}
+
+.btn-outline-gold {
+    border: 2px solid var(--accent);
+    color: var(--accent);
+    font-weight: 700;
+    padding: 0.8rem 2rem;
+    border-radius: 0.5rem;
+    text-transform: uppercase;
+}
+
+.btn-outline-gold:hover {
+    background: var(--accent);
+    color: #1e1b4b;
+}
+
+/* Cards */
+.card-premium {
+    background: white;
+    border: none;
+    border-left: 4px solid var(--border);
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s;
+}
+
+.card-premium:hover {
+    border-left-color: var(--accent);
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-premium);
+}
+
+.card-icon {
+    width: 3.5rem;
+    height: 3.5rem;
+    background: var(--primary);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.75rem;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Alerts List */
+.alert-strip {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    border-left: 4px solid var(--warning);
+    margin-bottom: 1rem;
+}
+
+/* Stats */
+.stat-box {
+    background: var(--primary);
+    color: white;
+    border-radius: 1.5rem;
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-box::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 200px;
+    height: 200px;
+    background: var(--accent);
+    opacity: 0.1;
+    border-radius: 50%;
+}
+
+.stat-number {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: var(--accent);
+    font-family: 'Outfit';
+}
+
+/* Footer */
+footer {
+    background: var(--primary);
+    color: #94a3b8;
+    padding: 4rem 0;
+    border-top: 4px solid var(--accent);
+}
+
+/* Animations */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.reveal {
+    animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

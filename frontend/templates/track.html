@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .track-card {
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid rgba(181, 154, 90, 0.2);
+        border-radius: 20px;
+        color: #e2e8f0;
+        max-width: 560px;
+    }
+
+    .track-input {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1.5px solid rgba(181, 154, 90, 0.3) !important;
+        color: #e2e8f0 !important;
+        border-radius: 10px;
+        font-size: 1.05rem;
+    }
+
+    .track-input:focus {
+        border-color: #b59a5a !important;
+        box-shadow: 0 0 0 3px rgba(181, 154, 90, 0.15) !important;
+    }
+
+    .track-input::placeholder {
+        color: rgba(255, 255, 255, 0.3) !important;
+    }
+
+    .status-badge-received {
+        background: rgba(99, 102, 241, 0.2);
+        color: #a5b4fc;
+        border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    .status-badge-review {
+        background: rgba(234, 179, 8, 0.2);
+        color: #fde047;
+        border: 1px solid rgba(234, 179, 8, 0.3);
+    }
+
+    .status-badge-resolved {
+        background: rgba(16, 185, 129, 0.2);
+        color: #6ee7b7;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-badge-other {
+        background: rgba(239, 68, 68, 0.2);
+        color: #fca5a5;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .result-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        font-size: 0.9rem;
+    }
+
+    .result-row:last-child {
+        border-bottom: none;
+    }
+</style>
+
+<div class="d-flex justify-content-center align-items-center py-5">
+    <div class="track-card p-5 w-100">
+
+        <div class="text-center mb-4">
+            <div class="d-inline-flex align-items-center justify-content-center mb-3"
+                style="width:68px;height:68px;background:rgba(181,154,90,0.1);border:2px solid rgba(181,154,90,0.3);border-radius:50%;">
+                <i class="bi bi-search" style="font-size:1.8rem; color:#b59a5a;"></i>
+            </div>
+            <h3 class="fw-bold text-white mb-1">Track Complaint</h3>
+            <p style="color:#94a3b8; font-size:0.9rem;">Enter your <strong style="color:#e2e8f0;">Tracking ID</strong>
+                (e.g. <code style="color:#6ee7b7;">CY-202602-A3F9B1</code>) or numeric ID.</p>
+        </div>
+
+        <form method="post">
+            <div class="mb-3">
+                <input class="form-control track-input py-3 px-3 text-center" type="text" name="id"
+                    placeholder="e.g. CY-202602-A3F9B1  or  42" value="{{ request.form.get('id', '') }}" required
+                    style="letter-spacing:0.05em;">
+            </div>
+            <button class="btn btn-primary w-100 py-3 fw-bold" type="submit">
+                <i class="bi bi-radar me-2"></i>Locate Complaint
+            </button>
+        </form>
+
+        {% if error %}
+        <div class="mt-4 p-3 rounded-3 text-center"
+            style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);">
+            <i class="bi bi-exclamation-triangle me-2 text-danger"></i>
+            <span style="color:#fca5a5;">{{ error }}</span>
+        </div>
+        {% endif %}
+
+        {% if result %}
+        <div class="mt-4 p-4 rounded-3" style="background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);">
+            <p class="fw-bold mb-3"
+                style="color:#6ee7b7; font-size:0.8rem; letter-spacing:0.1em; text-transform:uppercase;">
+                <i class="bi bi-check-circle me-1"></i> Complaint Found
+            </p>
+            <div class="result-row"><span style="color:#94a3b8;">Tracking ID</span><span class="fw-bold"
+                    style="color:#6ee7b7; font-family:monospace;">{{ result.complaint_id }}</span></div>
+            <div class="result-row"><span style="color:#94a3b8;">Database Ref</span><span class="fw-bold">#{{ result.id
+                    }}</span></div>
+            <div class="result-row"><span style="color:#94a3b8;">Filed By</span><span>{{ result.name }}</span></div>
+            <div class="result-row"><span style="color:#94a3b8;">Type</span><span>{{ result.type }}</span></div>
+            <div class="result-row">
+                <span style="color:#94a3b8;">Status</span>
+                <span class="px-3 py-1 rounded-pill fw-bold
+          {% if result.status == 'Received' %}status-badge-received
+          {% elif result.status == 'Under Review' %}status-badge-review
+          {% elif result.status == 'Resolved' %}status-badge-resolved
+          {% else %}status-badge-other{% endif %}">
+                    {{ result.status }}
+                </span>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="text-center mt-4">
+            <a href="/" style="color:#64748b; font-size:0.85rem;"><i class="bi bi-arrow-left me-1"></i>Back to Home</a>
+            &nbsp;|&nbsp;
+            <a href="/complaint" style="color:#64748b; font-size:0.85rem;">File New Complaint</a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

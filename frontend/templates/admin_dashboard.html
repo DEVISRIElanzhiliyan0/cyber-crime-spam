@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  .admin-card {
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(181, 154, 90, 0.2);
+    border-radius: 16px;
+    color: #e2e8f0;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .admin-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(181, 154, 90, 0.15);
+  }
+
+  .stat-num {
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: #b59a5a;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+
+  .badge-received {
+    background: rgba(99, 102, 241, 0.25);
+    color: #a5b4fc;
+  }
+
+  .badge-review {
+    background: rgba(234, 179, 8, 0.2);
+    color: #fde047;
+  }
+
+  .badge-resolved {
+    background: rgba(16, 185, 129, 0.2);
+    color: #6ee7b7;
+  }
+
+  .badge-rejected {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+  }
+
+  .tbl-header {
+    background: rgba(181, 154, 90, 0.12);
+    color: #b59a5a;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+  }
+
+  .tbl-row td {
+    border-color: rgba(255, 255, 255, 0.06) !important;
+    color: #cbd5e1;
+    vertical-align: middle;
+    font-size: 0.9rem;
+  }
+
+  .pill {
+    border-radius: 50px;
+    padding: 3px 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .admin-nav-pill {
+    border-radius: 8px;
+  }
+
+  .chart-bar {
+    background: linear-gradient(135deg, #b59a5a, #e2c97e);
+    border-radius: 4px;
+    transition: height 0.6s ease;
+  }
+</style>
+
+<div class="container-fluid py-4">
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div>
+      <h2 class="fw-bold text-white mb-1">🛡️ Admin Control Center</h2>
+      <p class="mb-0" style="color:#b59a5a; font-size:0.85rem;">Logged in as <strong>{{ admin_email }}</strong></p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a class="btn btn-sm btn-outline-light" href="/complaint"><i class="bi bi-plus-circle me-1"></i>New Complaint</a>
+      <a class="btn btn-sm btn-outline-warning" href="/stats"><i class="bi bi-graph-up me-1"></i>Full Stats</a>
+      <a class="btn btn-sm btn-danger" href="/admin/logout"><i class="bi bi-box-arrow-right me-1"></i>Logout</a>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
+      <div class="admin-card p-4 text-center">
+        <div class="stat-num">{{ total }}</div>
+        <div class="stat-label mt-1">Total Complaints</div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="admin-card p-4 text-center">
+        <div class="stat-num text-info">{{ by_status.get('Received', 0) }}</div>
+        <div class="stat-label mt-1">Received</div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="admin-card p-4 text-center">
+        <div class="stat-num" style="color:#fde047;">{{ by_status.get('Under Review', 0) }}</div>
+        <div class="stat-label mt-1">Under Review</div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="admin-card p-4 text-center">
+        <div class="stat-num" style="color:#6ee7b7;">{{ by_status.get('Resolved', 0) }}</div>
+        <div class="stat-label mt-1">Resolved</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <!-- Type Breakdown Chart -->
+    <div class="col-lg-5">
+      <div class="admin-card p-4 h-100">
+        <h5 class="fw-bold mb-3" style="color:#b59a5a;">📊 Complaints by Type</h5>
+        {% if by_type %}
+        {% for row in by_type %}
+        <div class="mb-3">
+          <div class="d-flex justify-content-between mb-1">
+            <span style="font-size:0.85rem;">{{ row[0] }}</span>
+            <span class="fw-bold" style="color:#b59a5a;">{{ row[1] }}</span>
+          </div>
+          <div class="progress" style="height:8px; background:rgba(255,255,255,0.08);">
+            <div class="progress-bar"
+              style="width:{{ ((row[1] / total) * 100)|int if total > 0 else 0 }}%; background:linear-gradient(90deg,#b59a5a,#e2c97e);">
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class="opacity-50 text-center mt-5">No data yet</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Status Breakdown -->
+    <div class="col-lg-7">
+      <div class="admin-card p-4 h-100">
+        <h5 class="fw-bold mb-3" style="color:#b59a5a;">📋 Status Overview</h5>
+        {% if by_status %}
+        <div class="row g-3">
+          {% for status, count in by_status.items() %}
+          <div class="col-sm-6">
+            <div style="background:rgba(255,255,255,0.04); border-radius:12px; padding:16px;">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="pill
+                  {% if status == 'Received' %}badge-received
+                  {% elif status == 'Under Review' %}badge-review
+                  {% elif status == 'Resolved' %}badge-resolved
+                  {% else %}badge-rejected{% endif %}">
+                  {{ status }}
+                </span>
+              </div>
+              <div style="font-size:2rem; font-weight:800; color:#e2e8f0;">{{ count }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="opacity-50 text-center mt-5">No status data yet</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Complaints Table -->
+  <div class="admin-card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-bold mb-0" style="color:#b59a5a;">🗂️ Recent Complaints</h5>
+      <span class="small opacity-50">Latest 10 entries</span>
+    </div>
+    {% if recent %}
+    <div class="table-responsive">
+      <table class="table table-borderless mb-0">
+        <thead class="tbl-header">
+          <tr>
+            <th>#ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Type</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in recent %}
+          <tr class="tbl-row">
+            <td><span class="fw-bold opacity-50">#{{ row[0] }}</span></td>
+            <td>{{ row[1] }}</td>
+            <td>{{ row[2] }}</td>
+            <td><span class="pill" style="background:rgba(99,102,241,0.2); color:#a5b4fc;">{{ row[3] }}</span></td>
+            <td>
+              <span class="pill
+                {% if row[4] == 'Received' %}badge-received
+                {% elif row[4] == 'Under Review' %}badge-review
+                {% elif row[4] == 'Resolved' %}badge-resolved
+                {% else %}badge-rejected{% endif %}">
+                {{ row[4] }}
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5 opacity-50">
+      <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+      <p>No complaints submitted yet. They'll appear here once filed.</p>
+      <a href="/complaint" class="btn btn-sm btn-outline-warning mt-2">File a Test Complaint</a>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

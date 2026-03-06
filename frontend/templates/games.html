@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="fw-bold">Cyber Awareness Arena</h1>
+        <p class="text-muted">Learn through play. Master cyber safety with our interactive challenges.</p>
+    </div>
+
+    <div class="row g-4">
+        <!-- Security Quiz Card -->
+        <div class="col-lg-6">
+            <div id="quiz-container" class="card card-premium p-5 h-100 shadow-sm border-0">
+                <div id="quiz-start">
+                    <div class="card-icon mx-auto mb-4" style="background: #1e1b4b; color: #b59a5a;">
+                        <i class="bi bi-question-circle"></i>
+                    </div>
+                    <h2 class="fw-bold text-center mb-3">Safety Quiz</h2>
+                    <p class="text-muted text-center mb-5">Test your knowledge on common cyber threats and safe
+                        practices.</p>
+                    <button class="btn btn-primary w-100 py-3" onclick="startQuiz()">START CHALLENGE</button>
+                </div>
+
+                <div id="quiz-play" class="d-none">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <span id="question-num" class="badge bg-gold text-dark">Question 1/5</span>
+                        <span id="score" class="fw-bold text-primary">Score: 0</span>
+                    </div>
+                    <div class="progress mb-4" style="height: 8px;">
+                        <div id="quiz-progress" class="progress-bar bg-accent" role="progressbar" style="width: 20%;">
+                        </div>
+                    </div>
+                    <h4 id="question-text" class="fw-bold mb-4">Loading question...</h4>
+                    <div id="options" class="d-grid gap-3">
+                        <!-- Options injected here -->
+                    </div>
+                </div>
+
+                <div id="quiz-results" class="d-none text-center">
+                    <div id="quiz-emoji" class="display-1 mb-4">🏆</div>
+                    <h2 id="quiz-status" class="fw-bold mb-3">Well Done!</h2>
+                    <p class="lead mb-4">You scored <span id="final-score" class="fw-bold">0</span> out of 5.</p>
+                    <div id="quiz-feedback" class="mb-4 small opacity-75"></div>
+                    <button class="btn btn-primary px-5" onclick="location.reload()">PLAY AGAIN</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phishing Catcher Mini-Game -->
+        <div class="col-lg-6">
+            <div id="game-container" class="card card-premium p-5 h-100 shadow-sm border-0 bg-primary text-white">
+                <div id="game-start">
+                    <div class="card-icon mx-auto mb-4" style="background: #ffffff; color: #1e1b4b;">
+                        <i class="bi bi-controller"></i>
+                    </div>
+                    <h2 class="fw-bold text-center mb-3">Link Catcher</h2>
+                    <p class="text-white opacity-75 text-center mb-5">Identify official URLs from suspicious ones. Don't
+                        let the hackers win!</p>
+                    <button class="btn btn-outline-gold w-100 py-3" onclick="startGame()">ENTER ARENA</button>
+                </div>
+
+                <div id="game-play" class="d-none text-center">
+                    <div class="h1 fw-bold mb-4">IS THIS SAFE?</div>
+                    <div id="url-box" class="p-4 rounded-3 mb-5 font-monospace"
+                        style="background: rgba(255,255,255,0.1); border: 2px solid rgba(181,154,90,0.5); font-size: 1.2rem; word-break: break-all;">
+                        https://secure-bank.verify-now.com/login
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <button class="btn btn-success w-100 py-4 fw-bold" onclick="checkChoice(true)"><i
+                                    class="bi bi-check-circle me-2"></i> SAFE</button>
+                        </div>
+                        <div class="col-6">
+                            <button class="btn btn-danger w-100 py-4 fw-bold" onclick="checkChoice(false)"><i
+                                    class="bi bi-x-circle me-2"></i> SUSPICIOUS</button>
+                        </div>
+                    </div>
+                    <div id="game-feedback" class="mb-4 h5 fw-bold d-none"></div>
+                    <div class="mt-2 opacity-50 small">Remaining: <span id="game-count">6</span> urls</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // QUIZ LOGIC
+    const quizData = [
+        { q: "What should you do if you receive an 'urgent' email from your bank asking for your PIN?", a: ["Provide it immediately", "Call the bank's official number", "Reply asking for proof", "Ignore it forever"], c: 1 },
+        { q: "Which of these is a hallmark of a phishing URL?", a: ["HTTPS padlock icon", "The official brand name", "Subtle misspellings (e.g., faceb0ok.com)", "A short URL"], c: 2 },
+        { q: "Two-Factor Authentication (2FA) is used to:", a: ["Make login faster", "Add an extra layer of security", "Store your passwords", "Backup your data"], c: 1 },
+        { q: "If you are a victim of cyber fraud, which number should you call in India?", a: ["100", "108", "1930", "1091"], c: 2 },
+        { q: "Sharing your OTP (One Time Password) with anyone is:", a: ["Safe if they are from the bank", "Never safe", "Safe for family", "Only safe for small payments"], c: 1 }
+    ];
+
+    let currentQ = 0;
+    let score = 0;
+
+    function startQuiz() {
+        document.getElementById('quiz-start').classList.add('d-none');
+        document.getElementById('quiz-play').classList.remove('d-none');
+        showQuestion();
+    }
+
+    function showQuestion() {
+        const q = quizData[currentQ];
+        document.getElementById('question-num').innerText = `Question ${currentQ + 1}/5`;
+        document.getElementById('question-text').innerText = q.q;
+        document.getElementById('quiz-progress').style.width = `${(currentQ + 1) * 20}%`;
+
+        const optionsDiv = document.getElementById('options');
+        optionsDiv.innerHTML = '';
+        q.a.forEach((opt, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'btn btn-outline-dark text-start p-3';
+            btn.innerText = opt;
+            btn.onclick = () => selectOption(i);
+            optionsDiv.appendChild(btn);
+        });
+    }
+
+    function selectOption(i) {
+        if (i === quizData[currentQ].c) score++;
+        currentQ++;
+        if (currentQ < quizData.length) {
+            showQuestion();
+            document.getElementById('score').innerText = `Score: ${score}`;
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        document.getElementById('quiz-play').classList.add('d-none');
+        document.getElementById('quiz-results').classList.remove('d-none');
+        document.getElementById('final-score').innerText = score;
+
+        const emoji = document.getElementById('quiz-emoji');
+        const status = document.getElementById('quiz-status');
+        const feedback = document.getElementById('quiz-feedback');
+
+        if (score === 5) {
+            emoji.innerText = "👑";
+            status.innerText = "CYBER EXPERT!";
+            feedback.innerText = "Perfect score! You are a master of digital safety.";
+        } else if (score >= 3) {
+            emoji.innerText = "🛡️";
+            status.innerText = "GREAT JOB!";
+            feedback.innerText = "You have a solid understanding of cyber security.";
+        } else {
+            emoji.innerText = "⚠️";
+            status.innerText = "NEED MORE PRACTICE";
+            feedback.innerText = "Stay safe! Review our safety guides to improve your awareness.";
+        }
+    }
+
+    // GAME LOGIC
+    const urls = [
+        { u: "https://www.google.com/search", s: true },
+        { u: "http://account-verification-service.xyz", s: false },
+        { u: "https://secure.onlinesbi.sbi", s: true },
+        { u: "https://facebook-login.security-check.in", s: false },
+        { u: "https://www.amazon.in/orders", s: true },
+        { u: "http://win-iphone-15-free.today/claim", s: false }
+    ];
+    let currentIdx = 0;
+
+    function startGame() {
+        document.getElementById('game-start').classList.add('d-none');
+        document.getElementById('game-play').classList.remove('d-none');
+        nextUrl();
+    }
+
+    function nextUrl() {
+        if (currentIdx >= urls.length) {
+            alert("Game Over! You mastered the URLs.");
+            location.reload();
+            return;
+        }
+        document.getElementById('url-box').innerText = urls[currentIdx].u;
+    }
+
+    function checkChoice(isSafe) {
+        const correct = isSafe === urls[currentIdx].s;
+        const feedback = document.getElementById('game-feedback');
+        feedback.classList.remove('d-none', 'text-success', 'text-danger');
+
+        if (correct) {
+            document.getElementById('url-box').style.borderColor = "#10b981";
+            feedback.innerText = "✅ CORRECT! You spotted the trick.";
+            feedback.classList.add('text-success');
+
+            setTimeout(() => {
+                currentIdx++;
+                feedback.classList.add('d-none');
+                document.getElementById('url-box').style.borderColor = "rgba(181,154,90,0.5)";
+                nextUrl();
+            }, 800);
+        } else {
+            document.getElementById('url-box').style.borderColor = "#ef4444";
+            feedback.innerText = "❌ LOSS! Watch out for that scam.";
+            feedback.classList.add('text-danger');
+
+            setTimeout(() => {
+                currentIdx++;
+                feedback.classList.add('d-none');
+                document.getElementById('url-box').style.borderColor = "rgba(181,154,90,0.5)";
+                nextUrl();
+            }, 1200);
+        }
+    }
+</script>
+{% endblock %}

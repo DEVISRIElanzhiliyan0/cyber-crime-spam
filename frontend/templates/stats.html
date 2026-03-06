@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-12">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h1 class="fw-bold mb-1">Portal Pulse</h1>
+        <p class="text-muted mb-0">Live incident metrics and analysis</p>
+      </div>
+      <a href="/" class="btn btn-outline-primary shadow-sm"><i class="bi bi-house-door me-2"></i>Dashboard</a>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="col-md-4">
+    <div class="card p-4 border-0 h-100 text-center">
+      <div class="stat-label mb-2">Total Complaints</div>
+      <div class="stat-value mb-2">{{ total }}</div>
+      <div class="text-muted small">Active case files in system</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card p-4 border-0 h-100 text-center">
+      <div class="stat-label mb-2">Detection Rate</div>
+      <div class="stat-value mb-2" style="color: #10b981;">94%</div>
+      <div class="text-muted small">AI classification accuracy</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card p-4 border-0 h-100 text-center">
+      <div class="stat-label mb-2">Response Time</div>
+      <div class="stat-value mb-2 text-warning">2.4h</div>
+      <div class="text-muted small">Average initial review time</div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="col-md-6">
+    <div class="card p-4 border-0 shadow-sm h-100">
+      <h5 class="fw-bold mb-4">Incidents by Type</h5>
+      <div style="height: 300px;">
+        <canvas id="typeChart"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card p-4 border-0 shadow-sm h-100">
+      <h5 class="fw-bold mb-4">Case Status Distribution</h5>
+      <div style="height: 300px;">
+        <canvas id="statusChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Chart Script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const typeCtx = document.getElementById('typeChart').getContext('2d');
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+
+    // Data from Flask
+    const typeData = {
+      labels: [{% for t, c in by_type %}"{{ t or 'Unknown' }}", {% endfor %}],
+    datasets: [{
+      data: [{% for t, c in by_type %}{{ c }}, {% endfor %}],
+    backgroundColor: ['#4f46e5', '#10b981', '#f59e0b', '#ec4899', '#3b82f6'],
+    borderWidth: 0,
+    borderRadius: 4
+            }]
+        };
+
+  const statusData = {
+    labels: [{% for s, c in by_status %}"{{ s or 'Unknown' }}", {% endfor %}],
+  datasets: [{
+    data: [{% for s, c in by_status %}{{ c }}, {% endfor %}],
+    backgroundColor: ['#e2e8f0', '#94a3b8', '#4f46e5', '#10b981'],
+      borderWidth: 0
+            }]
+        };
+
+  new Chart(typeCtx, {
+    type: 'bar',
+    data: typeData,
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, grid: { borderDash: [2, 2] } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  new Chart(statusCtx, {
+    type: 'doughnut',
+    data: statusData,
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '70%',
+      plugins: {
+        legend: { position: 'bottom', labels: { usePointStyle: true, padding: 15 } }
+      }
+    }
+  });
+    });
+</script>
+{% endblock %}

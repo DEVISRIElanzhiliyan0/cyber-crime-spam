@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="text-center mb-5">
+            <h1 class="fw-bold">Spam Shield AI</h1>
+            <p class="text-muted">Analyze messages or screenshots for potential malicious content</p>
+        </div>
+        <!-- Adding Tesseract.js for client-side OCR -->
+        <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+        <div class="row g-4">
+            <!-- Message Input -->
+            <div class="col-md-6">
+                <div class="card p-4 border-0 shadow-sm h-100">
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <div class="feature-icon m-0" style="width: 2.5rem; height: 2.5rem; font-size: 1.2rem;">
+                            <i class="bi bi-chat-left-dots"></i>
+                        </div>
+                        <h5 class="fw-bold mb-0">Paste Text</h5>
+                    </div>
+                    <form method="post">
+                        <div class="mb-4">
+                            <textarea class="form-control bg-light border-0" name="message" rows="8"
+                                placeholder="Paste the suspicious SMS, Email, or Message here..." required></textarea>
+                        </div>
+                        <button class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2"
+                            type="submit">
+                            <i class="bi bi-shield-shaded"></i>
+                            Analyze Text
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Image Upload -->
+            <div class="col-md-6">
+                <div class="card p-4 border-0 shadow-sm h-100">
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <div class="feature-icon m-0"
+                            style="width: 2.5rem; height: 2.5rem; font-size: 1.2rem; background: #ecfdf5; color: #10b981;">
+                            <i class="bi bi-camera"></i>
+                        </div>
+                        <h5 class="fw-bold mb-0">Upload Screenshot</h5>
+                    </div>
+                    <form method="post" action="/spam/upload" enctype="multipart/form-data">
+                        <div class="mb-4">
+                            <label for="screenshotInput"
+                                class="form-label small text-muted text-uppercase fw-bold">Select Image File</label>
+                            <input class="form-control" id="screenshotInput" type="file" name="screenshot"
+                                accept="image/*" required>
+                            <!-- Hidden field to store OCR text for submission -->
+                            <textarea id="hiddenOcrText" name="message" class="d-none"></textarea>
+                        </div>
+                        <div id="previewContainer" class="mb-4 text-center d-none">
+                            <img id="imagePreview" class="img-fluid rounded-3 border shadow-sm"
+                                style="max-height: 180px;">
+                            <div id="ocrStatus" class="mt-2 small text-primary d-none">
+                                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                <span>Extracting text...</span>
+                            </div>
+                        </div>
+                        <button
+                            class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-2"
+                            type="submit">
+                            <i class="bi bi-upload"></i>
+                            Extract & Analyze
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            {% if ocr_error or ocr_text or ocr_result %}
+            <div class="col-12 mt-5">
+                <div class="card border-0 shadow-sm overflow-hidden">
+                    <div class="bg-primary text-white p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="mb-0 fw-bold">Analysis Results</h4>
+                            {% if ocr_result %}
+                            <span
+                                class="badge bg-{{ 'danger' if ocr_result=='Spam' else 'success' }} fs-5 px-4 py-2 rounded-pill shadow-sm">
+                                <i
+                                    class="bi bi-{{ 'exclamation-octagon' if ocr_result=='Spam' else 'check-circle' }} me-2"></i>
+                                {{ ocr_result }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-white">
+                        {% if ocr_error %}
+                        <div
+                            class="alert alert-warning border-0 bg-warning-subtle d-flex align-items-center gap-3 mb-4">
+                            <i class="bi bi-exclamation-triangle fs-4"></i>
+                            <div><strong>Processing Note:</strong> {{ ocr_error }}</div>
+                        </div>
+                        {% endif %}
+
+                        <div class="row g-4">
+                            <div class="col-md-8">
+                                <div class="p-4 bg-light rounded-4">
+                                    <div class="d-flex justify-content-between mb-3">
+                                        <h6 class="text-uppercase fw-bold text-muted small mb-0">Content Scanned</h6>
+                                        <button id="copyBtn"
+                                            class="btn btn-sm btn-link text-primary p-0 text-decoration-none fw-bold">
+                                            <i class="bi bi-clipboard pe-1"></i> Copy Text
+                                        </button>
+                                    </div>
+                                    <div id="ocrBox" class="text-dark fs-5"
+                                        style="white-space: pre-wrap; font-family: inherit;">{{ ocr_text or 'No text
+                                        extracted.' }}</div>
+                                </div>
+                                <div class="mt-4 d-flex gap-2">
+                                    <form method="post" action="/report/save" class="d-inline">
+                                        <input type="hidden" name="text" value="{{ ocr_text or '' }}">
+                                        <button class="btn btn-primary px-4 rounded-pill">Save to Records</button>
+                                    </form>
+                                    <form method="post" action="/report/flag" class="d-inline">
+                                        <input type="hidden" name="text" value="{{ ocr_text or '' }}">
+                                        <button class="btn btn-outline-danger px-4 rounded-pill">Flag for
+                                            Review</button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card p-4 border-0 bg-light rounded-4 h-100">
+                                    <h6 class="text-uppercase fw-bold text-muted small mb-3">Recommended Actions</h6>
+                                    <div class="d-grid gap-3">
+                                        <a class="btn btn-white border shadow-sm text-start" href="/complaint">
+                                            <i class="bi bi-file-earmark-plus text-primary me-2"></i>File Legal
+                                            Complaint
+                                        </a>
+                                        <a class="btn btn-white border shadow-sm text-start"
+                                            href="mailto:?subject=Spam%20Detection%20Alert&body={{ (ocr_text or '')|urlencode }}">
+                                            <i class="bi bi-share text-primary me-2"></i>Share Alert
+                                        </a>
+                                        <a class="btn btn-white border shadow-sm text-start" href="/guidelines">
+                                            <i class="bi bi-info-circle text-primary me-2"></i>Safety Guidelines
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const input = document.getElementById('screenshotInput');
+        const previewContainer = document.getElementById('previewContainer');
+        const imagePreview = document.getElementById('imagePreview');
+        const status = document.getElementById('ocrStatus');
+        const textarea = document.querySelector('textarea[name="message"]');
+
+        if (input) {
+            input.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                previewContainer.classList.remove('d-none');
+                imagePreview.src = URL.createObjectURL(file);
+
+                // Perform Client-side OCR
+                status.classList.remove('d-none');
+                try {
+                    const { data: { text } } = await Tesseract.recognize(file, 'eng');
+                    if (text && text.trim().length > 0) {
+                        const extractedText = text.trim();
+                        // Populate both textareas (visible one and hidden one in upload form)
+                        if (textarea) textarea.value = extractedText;
+                        const hiddenTextarea = document.getElementById('hiddenOcrText');
+                        if (hiddenTextarea) hiddenTextarea.value = extractedText;
+
+                        status.innerHTML = '<i class="bi bi-check-circle-fill text-success me-2"></i>Text extracted automatically!';
+                    } else {
+                        status.innerHTML = '<i class="bi bi-exclamation-circle text-warning me-2"></i>No text detected in image.';
+                    }
+                } catch (err) {
+                    console.error(err);
+                    status.innerHTML = '<i class="bi bi-exclamation-triangle text-danger me-2"></i>OCR failed.';
+                }
+            });
+        }
+
+        const copyBtn = document.getElementById('copyBtn');
+        const ocrBox = document.getElementById('ocrBox');
+        if (copyBtn && ocrBox) {
+            copyBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(ocrBox.innerText).then(() => {
+                    const originalHTML = copyBtn.innerHTML;
+                    copyBtn.innerHTML = '<i class="bi bi-check2"></i> Copied!';
+                    setTimeout(() => copyBtn.innerHTML = originalHTML, 2000);
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

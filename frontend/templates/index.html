@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="hero-container mb-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-7 text-center text-lg-start">
+                <div class="hero-badge mb-3">Certified Secure Portal</div>
+                <h1 class="display-3 fw-bold mb-4">Protecting Your Digital Identity</h1>
+                <p class="lead mb-5 opacity-90">National unified platform to report cyber incidents, analyze threats,
+                    and receive immediate support from security experts.</p>
+                <div class="d-flex justify-content-center justify-content-lg-start gap-3">
+                    <a class="btn btn-primary px-5" href="/complaint">
+                        <i class="bi bi-shield-plus me-2"></i> File Report
+                    </a>
+                    <a class="btn btn-outline-gold px-5" href="/track">
+                        <i class="bi bi-search me-2"></i> Track Case
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-5 d-none d-lg-block">
+                <div class="p-4 rounded-4"
+                    style="background: rgba(181, 154, 90, 0.1); border: 1px solid var(--accent);">
+                    <h5 class="text-white mb-3">Live Threat Counter</h5>
+                    <div class="d-flex gap-2 align-items-end mb-2">
+                        <span class="h1 fw-bold text-white mb-0">1,204</span>
+                        <span class="text-success small mb-1"><i class="bi bi-graph-up"></i> +12%</span>
+                    </div>
+                    <p class="text-white opacity-50 small mb-0">Phishing attempts blocked today</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card card-premium p-4 h-100">
+                <div class="card-icon">
+                    <i class="bi bi-file-lock"></i>
+                </div>
+                <h4 class="mb-3">Incident Reporting</h4>
+                <p class="text-muted small mb-4">Securely submit details of financial frauds, identity thefts, or social
+                    media harassment for immediate action.</p>
+                <a href="/complaint" class="text-decoration-none text-primary fw-bold small">ACCESS PORTAL <i
+                        class="bi bi-chevron-right"></i></a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-premium p-4 h-100" style="border-left-color: var(--accent);">
+                <div class="card-icon" style="background: var(--primary); color: var(--accent);">
+                    <i class="bi bi-robot"></i>
+                </div>
+                <h4 class="mb-3">AI Cyber Assistant</h4>
+                <p class="text-muted small mb-4">Chat with our AI in Tamil, Hindi, or English. Analyze messages for
+                    threats and get instant reporting guidance.</p>
+                <a href="/assistant" class="text-decoration-none text-accent fw-bold small">CHAT WITH AI <i
+                        class="bi bi-chevron-right"></i></a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-premium p-4 h-100" style="border-left-color: #f59e0b;">
+                <div class="card-icon" style="background: #451a03; color: #f59e0b;">
+                    <i class="bi bi-controller"></i>
+                </div>
+                <h4 class="mb-3">Awareness Arena</h4>
+                <p class="text-muted small mb-4">Master cyber safety through interactive games and quizzes. Learn to
+                    identify threats while you play.</p>
+                <a href="/games" class="text-decoration-none text-warning fw-bold small">PLAY & LEARN <i
+                        class="bi bi-chevron-right"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-5 mb-5">
+        <div class="col-lg-8">
+            <h3 class="mb-4">National Security Alerts</h3>
+            <div class="alert-strip shadow-sm">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="badge bg-warning text-dark mb-2">HIGH RISK</span>
+                        <h6 class="mb-1">New Ransomware Campaign: "ByteLock"</h6>
+                        <p class="small text-muted mb-0">Targeting professional sectors via fake invoice attachments. Do
+                            not open .zip files.</p>
+                    </div>
+                    <span class="small text-muted">2h ago</span>
+                </div>
+            </div>
+            <div class="alert-strip shadow-sm" style="border-left-color: var(--primary);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="badge bg-primary text-white mb-2">ADVISORY</span>
+                        <h6 class="mb-1">Banking SMS Smishing Advisory</h6>
+                        <p class="small text-muted mb-0">Scammers spoofing official bank shortcodes. Always verify via
+                            official app.</p>
+                    </div>
+                    <span class="small text-muted">1d ago</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <h3 class="mb-4">Emergency Support</h3>
+            <div class="stat-box shadow-sm">
+                <h6 class="text-white opacity-50 text-uppercase mb-2">24/7 HELPLINE</h6>
+                <div class="stat-number mb-3">1930</div>
+                <p class="text-white small mb-4">Call immediately for financial cyber fraud assistance.</p>
+                <hr class="border-white opacity-10 my-4">
+                <h6 class="text-white opacity-50 text-uppercase mb-2">SUPPORT EMAIL</h6>
+                <p class="text-white fw-bold mb-0">incident@cyberportal.gov</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -105,19 +105,19 @@
     </div>
     <div class="col-sm-6 col-lg-3">
       <div class="admin-card p-4 text-center">
-        <div class="stat-num text-info">{{ by_status.get('Received', 0) }}</div>
+        <div class="stat-num text-info">{{ by_status.get('Received', 0) if by_status else 0 }}</div>
         <div class="stat-label mt-1">Received</div>
       </div>
     </div>
     <div class="col-sm-6 col-lg-3">
       <div class="admin-card p-4 text-center">
-        <div class="stat-num" style="color:#fde047;">{{ by_status.get('Under Review', 0) }}</div>
+        <div class="stat-num" style="color:#fde047;">{{ by_status.get('Under Review', 0) if by_status else 0 }}</div>
         <div class="stat-label mt-1">Under Review</div>
       </div>
     </div>
     <div class="col-sm-6 col-lg-3">
       <div class="admin-card p-4 text-center">
-        <div class="stat-num" style="color:#6ee7b7;">{{ by_status.get('Resolved', 0) }}</div>
+        <div class="stat-num" style="color:#6ee7b7;">{{ by_status.get('Resolved', 0) if by_status else 0 }}</div>
         <div class="stat-label mt-1">Resolved</div>
       </div>
     </div>
@@ -132,12 +132,12 @@
         {% for row in by_type %}
         <div class="mb-3">
           <div class="d-flex justify-content-between mb-1">
-            <span style="font-size:0.85rem;">{{ row[0] }}</span>
-            <span class="fw-bold" style="color:#b59a5a;">{{ row[1] }}</span>
+            <span style="font-size:0.85rem;">{{ row[0] if (row is sequence and not row is mapping) else row['type'] }}</span>
+            <span class="fw-bold" style="color:#b59a5a;">{{ row[1] if (row is sequence and not row is mapping) else (row['count'] if 'count' in row else row['COUNT(*)']) }}</span>
           </div>
           <div class="progress" style="height:8px; background:rgba(255,255,255,0.08);">
             <div class="progress-bar"
-              style="width:{{ ((row[1] / total) * 100)|int if total > 0 else 0 }}%; background:linear-gradient(90deg,#b59a5a,#e2c97e);">
+              style="width:{{ (((row[1] if (row is sequence and not row is mapping) else (row['count'] if 'count' in row else row['COUNT(*)'])) / total) * 100)|int if total > 0 else 0 }}%; background:linear-gradient(90deg,#b59a5a,#e2c97e);">
             </div>
           </div>
         </div>
@@ -199,17 +199,18 @@
         <tbody>
           {% for row in recent %}
           <tr class="tbl-row">
-            <td><span class="fw-bold opacity-50">#{{ row[0] }}</span></td>
-            <td>{{ row[1] }}</td>
-            <td>{{ row[2] }}</td>
-            <td><span class="pill" style="background:rgba(99,102,241,0.2); color:#a5b4fc;">{{ row[3] }}</span></td>
+            <td><span class="fw-bold opacity-50">#{{ row[0] if (row is sequence and not row is mapping) else row['id'] }}</span></td>
+            <td>{{ row[1] if (row is sequence and not row is mapping) else row['name'] }}</td>
+            <td>{{ row[2] if (row is sequence and not row is mapping) else row['email'] }}</td>
+            <td><span class="pill" style="background:rgba(99,102,241,0.2); color:#a5b4fc;">{{ row[3] if (row is sequence and not row is mapping) else row['type'] }}</span></td>
             <td>
+              {% set r_status = row[4] if (row is sequence and not row is mapping) else row['status'] %}
               <span class="pill
-                {% if row[4] == 'Received' %}badge-received
-                {% elif row[4] == 'Under Review' %}badge-review
-                {% elif row[4] == 'Resolved' %}badge-resolved
+                {% if r_status == 'Received' %}badge-received
+                {% elif r_status == 'Under Review' %}badge-review
+                {% elif r_status == 'Resolved' %}badge-resolved
                 {% else %}badge-rejected{% endif %}">
-                {{ row[4] }}
+                {{ r_status }}
               </span>
             </td>
           </tr>

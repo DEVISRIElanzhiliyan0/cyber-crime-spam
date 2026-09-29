@@ -1,28 +1,66 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div class="container py-5">
   <div class="row justify-content-center">
-    <div class="col-md-6">
-      <div class="card p-4">
-        <h3 class="mb-3">Admin Login</h3>
+    <div class="col-md-6 col-lg-5">
+      <div class="card card-premium p-4 p-md-5">
+        <div class="text-center mb-4">
+          <div class="card-icon mx-auto mb-3" style="width: 55px; height: 55px; font-size: 1.5rem;">
+            <i class="bi bi-shield-lock-fill"></i>
+          </div>
+          <h3 class="fw-bold mb-1">Admin Portal</h3>
+          <p class="text-muted small">Authorized personnel & case management access</p>
+        </div>
+
         {% if error %}
-          <div class="alert alert-danger">{{ error }}</div>
+          <div class="alert alert-danger py-2 small mb-4 d-flex align-items-center gap-2">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span>{{ error }}</span>
+          </div>
         {% endif %}
-        <form method="post">
-          <div class="mb-3">
-            <label class="form-label">Email</label>
-            <input class="form-control" type="email" name="email" required>
+
+        <div class="p-3 mb-4 rounded-3" style="background: rgba(181, 154, 90, 0.12); border: 1px dashed var(--accent);">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <span class="small fw-bold text-accent"><i class="bi bi-key-fill me-1"></i>Demo Credentials</span>
+            <button type="button" class="btn btn-xs btn-outline-warning py-0 px-2" style="font-size: 0.75rem;" onclick="autofillDemo()">Autofill</button>
           </div>
-          <div class="mb-3">
-            <label class="form-label">Password</label>
-            <input class="form-control" type="password" name="password" required>
+          <div class="small opacity-75">
+            <strong>Email:</strong> devisrie24aid@vetias.ac.in<br>
+            <strong>Password:</strong> kimtaehyungdevi
           </div>
-          <div class="d-flex gap-2">
-            <button class="btn btn-primary" type="submit">Login</button>
-            <a class="btn btn-outline-secondary" href="/">Back</a>
+        </div>
+
+        <form method="post" id="adminLoginForm">
+          <div class="mb-3">
+            <label class="form-label small text-uppercase fw-bold text-muted">Admin Email</label>
+            <input class="form-control" type="email" id="loginEmail" name="email" placeholder="admin@vetias.ac.in" required>
+          </div>
+          <div class="mb-4">
+            <label class="form-label small text-uppercase fw-bold text-muted">Password</label>
+            <input class="form-control" type="password" id="loginPassword" name="password" placeholder="••••••••" required>
+          </div>
+          <div class="d-grid gap-2">
+            <button class="btn btn-primary" type="submit">
+              <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+            </button>
+            <a class="btn btn-outline-gold" href="/dashboard">
+              <i class="bi bi-speedometer2 me-1"></i> Direct to Dashboard
+            </a>
+            <a class="btn btn-link text-muted small text-decoration-none mt-2" href="/">
+              <i class="bi bi-arrow-left me-1"></i> Return to Homepage
+            </a>
           </div>
         </form>
       </div>
     </div>
   </div>
+</div>
+
+<script>
+  function autofillDemo() {
+    document.getElementById('loginEmail').value = 'devisrie24aid@vetias.ac.in';
+    document.getElementById('loginPassword').value = 'kimtaehyungdevi';
+  }
+</script>
 {% endblock %}

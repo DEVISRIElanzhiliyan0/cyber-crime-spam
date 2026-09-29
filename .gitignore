@@ -9,3 +9,4 @@ frontend/static/uploads/*
 # spam.csv
 .env
 .dev-secret-change-me
+.vercel

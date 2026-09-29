@@ -12,24 +12,34 @@
 
 <body class="d-flex flex-column min-vh-100">
   <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-    <div class="container">
-      <a class="navbar-brand d-flex align-items-center gap-3" href="/">
-        <img src="/static/images/logo.png" alt="CyberPortal Logo">
-        <span class="d-none d-sm-inline">CyberPortal</span>
+    <div class="container-fluid px-lg-4">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+        <img src="/static/images/logo.png" alt="CyberPortal Logo" height="38">
+        <span class="d-none d-sm-inline fw-bold text-white">CyberPortal</span>
       </a>
       <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#nav"
         aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
         <i class="bi bi-list fs-1 text-white"></i>
       </button>
       <div class="collapse navbar-collapse" id="nav">
-        <ul class="navbar-nav ms-auto gap-3">
-          <li class="nav-item"><a class="nav-link" href="/complaint">Report</a></li>
-          <li class="nav-item"><a class="nav-link" href="/track">Track</a></li>
-          <li class="nav-item"><a class="nav-link" href="/assistant">AI Assistant</a></li>
-          <li class="nav-item"><a class="nav-link" href="/games">Cyber Games</a></li>
-          <li class="nav-item"><a class="nav-link" href="/stats">Pulse</a></li>
-          <li class="nav-item ms-lg-3">
-            <a class="btn btn-primary px-4 shadow-sm" href="/admin/login">Admin Access</a>
+        <ul class="navbar-nav ms-auto gap-1 gap-xl-2 align-items-lg-center">
+          <li class="nav-item"><a class="nav-link" href="/"><i class="bi bi-house-door me-1"></i>Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="/complaint"><i class="bi bi-shield-plus me-1"></i>Report Incident</a></li>
+          <li class="nav-item"><a class="nav-link" href="/track"><i class="bi bi-search me-1"></i>Track Case</a></li>
+          <li class="nav-item"><a class="nav-link" href="/assistant"><i class="bi bi-robot me-1"></i>AI Assistant</a></li>
+          <li class="nav-item"><a class="nav-link" href="/spam"><i class="bi bi-shield-check me-1"></i>Spam Check</a></li>
+          <li class="nav-item"><a class="nav-link" href="/games"><i class="bi bi-controller me-1"></i>Cyber Games</a></li>
+          <li class="nav-item"><a class="nav-link" href="/stats"><i class="bi bi-activity me-1"></i>Pulse</a></li>
+          <li class="nav-item">
+            <a class="nav-link text-warning fw-semibold" href="/dashboard">
+              <i class="bi bi-speedometer2 me-1"></i>Dashboard
+            </a>
+          </li>
+          <li class="nav-item"><a class="nav-link" href="/guidelines"><i class="bi bi-journal-text me-1"></i>Guidelines</a></li>
+          <li class="nav-item ms-lg-2">
+            <a class="btn btn-primary btn-sm px-3 shadow-sm d-flex align-items-center gap-1" href="/admin/login">
+              <i class="bi bi-lock-fill"></i><span>Admin</span>
+            </a>
           </li>
         </ul>
       </div>

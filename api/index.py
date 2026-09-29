@@ -268,6 +268,10 @@ def assistant_chat():
 @app.route('/static/uploads/<path:filename>')
 def uploads(filename): return send_from_directory(UPLOAD_DIR, filename)
 
+@app.route('/static/<path:filename>')
+def custom_static(filename):
+    return send_from_directory(STATIC_DIR, filename)
+
 @app.route('/games')
 def games(): return render_template('games.html')
 
